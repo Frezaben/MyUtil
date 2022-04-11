@@ -8,15 +8,11 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 public class ExcelUtil {
@@ -215,6 +211,30 @@ public class ExcelUtil {
         return workbook;
     }
 
+    private static Workbook getWorkbook(String path){
+        Workbook workbook;
+        File file = new File(path);
+        InputStream inputStream;
+        try {
+            inputStream = new FileInputStream(path);
+        } catch (FileNotFoundException e) {
+            throw new ExcelReadException("Can not read file '"+path+"',file not found");
+        }
+        String fileName = file.getName();
+        try {
+            if (fileName.endsWith("xls")) {
+                workbook = new HSSFWorkbook(inputStream);
+            } else if (fileName.endsWith("xlsx")) {
+                workbook = new XSSFWorkbook(inputStream);
+            } else {
+                throw new ExcelReadException("Can not read file '" + fileName + "',unknown file type");
+            }
+        }catch (IOException e){
+            throw new ExcelReadException("Can not open file ,"+e.getMessage());
+        }
+        return workbook;
+    }
+
     /**
      * @param cls 实例对象
      * @param <E> 实例对象
@@ -230,4 +250,100 @@ public class ExcelUtil {
         }
         return data;
     }
-}
+
+    public static <E> Workbook output(String templatePaths, Collection<E> collection,Class<E> cls, String ...ignoreFileds){
+        Workbook template = getWorkbook(templatePaths);
+        if (null == collection || collection.size()==0){
+            return template;
+        }
+        List<E> dataList = collection.stream().toList();
+        ExcelSheet annotation = cls.getAnnotation(ExcelSheet.class);
+        Sheet sheet;
+        String sheetName = annotation.sheet();
+        if("".equals(sheetName)){
+            sheetName = SHEET_NAME;
+        }
+        sheet = template.getSheet(sheetName);
+        HashMap<String,Integer> headRow = getCellHead(sheet,annotation.section());
+        if(null!=ignoreFileds&&ignoreFileds.length>0){
+            for (String ignoreFiled : ignoreFileds){
+                headRow.remove(ignoreFiled);
+            }
+        }
+        int dataIndex = 0;
+        if (annotation.auto()) {
+            for (int start = annotation.data(); start <= dataList.size(); start++) {
+                writeRowAuto(sheet.getRow(start), dataList.get(dataIndex++), headRow);
+            }
+        }else {
+            for (int start = annotation.data(); start <= dataList.size(); start++) {
+                writeRow(sheet.getRow(start), dataList.get(dataIndex++), headRow);
+            }
+        }
+        return template;
+    }
+
+    private static <E> void writeRow(Row row,E data,HashMap<String,Integer> headRow){
+        Class<?> cls = data.getClass();
+        headRow.forEach((key,value)->{
+            Cell cell = row.createCell(value);
+
+            Field field;
+            try {
+                field = cls.getDeclaredField(key);
+            } catch (NoSuchFieldException e) {
+                log.warn("filed :'"+key+"' not found in class:'"+cls.getName()+"'");
+                return;
+            }
+            setCellValue(cell,field,data);
+        });
+    }
+
+    private static <E> void writeRowAuto(Row row,E data,HashMap<String,Integer> headRow){
+        Class<?> cls = data.getClass();
+        Field[] fields = cls.getDeclaredFields();
+        for (Field field: fields){
+            Integer index = null;
+            ApiModelProperty annotation = field.getAnnotation(ApiModelProperty.class);
+            if(null != annotation){
+                index = headRow.get(annotation.value());
+            }
+            if(null == index){
+                ExcelCell excelCell = field.getAnnotation(ExcelCell.class);
+                if(null != excelCell) {
+                    index = headRow.get(excelCell.cell());
+                }else {
+                    index = headRow.get(field.getName());
+                }
+            }
+            if(null == index){
+                log.warn("filed :'"+field.getName()+"' not found in class:'"+cls.getName()+"'");
+                return;
+            }
+            Cell cell = row.createCell(index);
+            setCellValue(cell,field,data);
+        }
+    }
+
+    private static <E> void setCellValue(Cell cell,Field field,E data){
+        field.setAccessible(true);
+        Object filedValue;
+        try {
+            filedValue = field.get(data);
+        } catch (IllegalAccessException e) {
+            log.warn("Fail to write cell, can not access field:'"+field.getName()+"'");
+            return;
+        }
+        if(null == filedValue){
+            return;
+        }
+        Class<?> fieldCls =field.getType();
+        if(fieldCls.isInstance("")){
+            cell.setCellValue(filedValue.toString());
+        }else if(fieldCls.isInstance(0)||fieldCls.isInstance(Double.valueOf("0"))||fieldCls.isInstance(0L)){
+            cell.setCellValue(((Number) filedValue).doubleValue());
+        } else if(fieldCls.isInstance(new Date())){
+            cell.setCellValue((Date) filedValue);
+        }
+    }
+ }

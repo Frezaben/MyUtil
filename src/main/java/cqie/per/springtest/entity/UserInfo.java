@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.Date;
 
-@ExcelSheet(sheet = "工作表1",auto = false)
+@ExcelSheet(sheet = "工作表1",auto = true)
 public class UserInfo {
     @ApiModelProperty("姓名")
     private String name;

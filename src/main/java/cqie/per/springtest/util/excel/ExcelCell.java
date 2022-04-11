@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExcelCell {
-    String cell() default"" ;
+    String cell();
     boolean nullable() default true;
+    boolean outputIgnore() default false;
 }

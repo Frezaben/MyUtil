@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExcelSheet {
-    String sheet() default "";
+    String sheet();
     int section() default 0;
     int data() default 1;
     boolean auto() default true;
