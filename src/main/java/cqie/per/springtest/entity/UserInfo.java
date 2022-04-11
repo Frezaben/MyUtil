@@ -12,7 +12,7 @@ public class UserInfo {
     private String name;
     @ApiModelProperty("编号")
     private Long id;
-    @ExcelCell(cell = "用户代码")
+    @ExcelCell(cellName = "用户代码")
     private Integer uid;
     public String age;
     @ApiModelProperty("时间")

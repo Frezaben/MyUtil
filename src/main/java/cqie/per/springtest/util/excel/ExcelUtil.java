@@ -49,8 +49,8 @@ public class ExcelUtil {
         int lastRow = sheet.getLastRowNum();
         List<E> dataList = new ArrayList<>();
         if(null != annotation) {
-            startRow = annotation.data();
-            HashMap<String,Integer> headRow = getCellHead(sheet,annotation.section());
+            startRow = annotation.dataRow();
+            HashMap<String,Integer> headRow = getCellHead(sheet,annotation.sectionRow());
             if(annotation.auto()) {
                 for (; startRow <= lastRow; startRow++) {
                     E data = getInstance(cls);
@@ -84,7 +84,7 @@ public class ExcelUtil {
             ApiModelProperty annotation = field.getAnnotation(ApiModelProperty.class);
             ExcelCell cellAnnotation = field.getAnnotation(ExcelCell.class);
             if(null != cellAnnotation){
-                celNum = headRow.get(cellAnnotation.cell());
+                celNum = headRow.get(cellAnnotation.cellName());
             }
             if(null != annotation) {
                 celNum = headRow.get(annotation.value());
@@ -112,9 +112,9 @@ public class ExcelUtil {
             if(null == cellAnnotation){
                 continue;
             }
-            Integer celNum = headRow.get(cellAnnotation.cell());
+            Integer celNum = headRow.get(cellAnnotation.cellName());
             if(null == celNum){
-                log.warn("Can not find field:'"+cellAnnotation.cell()+"' in excel, continue processing excel");
+                log.warn("Can not find field:'"+cellAnnotation.cellName()+"' in excel, continue processing excel");
                 continue;
             }
             try {
@@ -251,7 +251,7 @@ public class ExcelUtil {
         return data;
     }
 
-    public static <E> Workbook output(String templatePaths, Collection<E> collection,Class<E> cls, String ...ignoreFileds){
+    public static <E> Workbook output(String templatePaths, Collection<E> collection,Class<E> cls, String ...ignoreFields){
         Workbook template = getWorkbook(templatePaths);
         if (null == collection || collection.size()==0){
             return template;
@@ -264,19 +264,19 @@ public class ExcelUtil {
             sheetName = SHEET_NAME;
         }
         sheet = template.getSheet(sheetName);
-        HashMap<String,Integer> headRow = getCellHead(sheet,annotation.section());
-        if(null!=ignoreFileds&&ignoreFileds.length>0){
-            for (String ignoreFiled : ignoreFileds){
+        HashMap<String,Integer> headRow = getCellHead(sheet,annotation.sectionRow());
+        if(null!=ignoreFields&&ignoreFields.length>0){
+            for (String ignoreFiled : ignoreFields){
                 headRow.remove(ignoreFiled);
             }
         }
         int dataIndex = 0;
         if (annotation.auto()) {
-            for (int start = annotation.data(); start <= dataList.size(); start++) {
+            for (int start = annotation.dataRow(); start <= dataList.size(); start++) {
                 writeRowAuto(sheet.getRow(start), dataList.get(dataIndex++), headRow);
             }
         }else {
-            for (int start = annotation.data(); start <= dataList.size(); start++) {
+            for (int start = annotation.dataRow(); start <= dataList.size(); start++) {
                 writeRow(sheet.getRow(start), dataList.get(dataIndex++), headRow);
             }
         }
@@ -287,12 +287,15 @@ public class ExcelUtil {
         Class<?> cls = data.getClass();
         headRow.forEach((key,value)->{
             Cell cell = row.createCell(value);
-
             Field field;
             try {
                 field = cls.getDeclaredField(key);
             } catch (NoSuchFieldException e) {
                 log.warn("filed :'"+key+"' not found in class:'"+cls.getName()+"'");
+                return;
+            }
+            ExcelCell excelCell = field.getAnnotation(ExcelCell.class);
+            if(null == excelCell || excelCell.outputIgnore()){
                 return;
             }
             setCellValue(cell,field,data);
@@ -303,15 +306,19 @@ public class ExcelUtil {
         Class<?> cls = data.getClass();
         Field[] fields = cls.getDeclaredFields();
         for (Field field: fields){
+            ExcelCell excelCell = field.getAnnotation(ExcelCell.class);
+            if(null != excelCell && excelCell.outputIgnore()){
+                return;
+            }
             Integer index = null;
             ApiModelProperty annotation = field.getAnnotation(ApiModelProperty.class);
             if(null != annotation){
                 index = headRow.get(annotation.value());
             }
             if(null == index){
-                ExcelCell excelCell = field.getAnnotation(ExcelCell.class);
+
                 if(null != excelCell) {
-                    index = headRow.get(excelCell.cell());
+                    index = headRow.get(excelCell.cellName());
                 }else {
                     index = headRow.get(field.getName());
                 }
