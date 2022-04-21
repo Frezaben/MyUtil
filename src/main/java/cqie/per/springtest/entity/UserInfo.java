@@ -3,13 +3,19 @@ package cqie.per.springtest.entity;
 import cqie.per.springtest.util.excel.ExcelCell;
 import cqie.per.springtest.util.excel.ExcelSheet;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @ExcelSheet(sheet = "工作表1",auto = true)
+@Data
 public class UserInfo {
     @ApiModelProperty("姓名")
     private String name;
+    private List<String> list;
+    private Set<Integer> set;
     @ApiModelProperty("编号")
     private Long id;
     @ExcelCell(cellName = "用户代码")

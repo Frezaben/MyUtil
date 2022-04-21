@@ -22,6 +22,15 @@ public class TestController {
     public List<UserInfo> uploadBom(@RequestBody MultipartFile file){
         System.out.println(file.getName());
         return ExcelUtil.readExcel(file,UserInfo.class);
+
+    }
+
+    @PostMapping(value = "xxxx")
+    @ApiOperation("test")
+    public List<UserInfo> xxxxx(@RequestBody MultipartFile file){
+        System.out.println(file.getName());
+        return ExcelUtil.readExcel(file,UserInfo.class);
+
     }
 
     @PostMapping(value = "xx")
