@@ -52,21 +52,33 @@ public class TestController {
         List<StudentInfo> studentList = new ArrayList<>();
         StudentInfo studentInfo = new StudentInfo();
         studentInfo.setName("xx");
-        studentInfo.setUid(18900);
+        studentInfo.setUid(1890011);
         StudentInfo studentInfo1 = new StudentInfo();
         studentInfo1.setName("xxx");
-        studentInfo1.setUid(1800);
+        studentInfo1.setUid(1800231);
+        studentInfo.setUid(189003124);
+        StudentInfo studentInfo2 = new StudentInfo();
+        studentInfo2.setName("xxx");
+        studentInfo2.setUid(1800123124);
+        StudentInfo studentInfo3 = new StudentInfo();
+        studentInfo3.setName("xxxx");
+        studentInfo3.setUid(1);
         studentList.add(studentInfo);
         studentList.add(studentInfo1);
-        Workbook workbook = ExcelUtil.write("C:\\Users\\benye\\Desktop\\tem.xlsx",studentList,StudentInfo.class);
+        studentList.add(studentInfo2);
+        studentList.add(studentInfo3);
+
+
+        Workbook workbook = ExcelUtil.write("",studentList,StudentInfo.class);
         FileOutputStream fileOutputStream = null;
-        File file = new File("C:\\Users\\benye\\Desktop\\output.xlsx");
+        File file = new File("");
         try {
             fileOutputStream = new FileOutputStream(file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         try {
+            assert workbook != null;
             workbook.write(fileOutputStream);
         } catch (IOException e) {
             e.printStackTrace();

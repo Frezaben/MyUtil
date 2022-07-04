@@ -22,44 +22,49 @@ public class MergeWriter {
         Workbook workbook = commonWriter.getWorkbook(tempPath);
         Class<?> cls = dataList.get(0).getClass();
         ExcelSheet annotation = cls.getAnnotation(ExcelSheet.class);
+        String sheetName = annotation.sheet();
         HashMap<Integer, String> headCell =
-                commonWriter.getHeadCell(workbook.getSheet("工作表1"),annotation.sectionRow());
+                commonWriter.getHeadCell(workbook.getSheet(sheetName),annotation.sectionRow());
         int columnSize = headCell.size();
-        Sheet sheet = workbook.getSheet("工作表1");
-        for(int column = 0; column <= columnSize;column++){
+        Sheet sheet = workbook.getSheet(sheetName);
+        for(int column = 0; column < columnSize;column++){
             Field field;
             try {
                 field = cls.getDeclaredField(headCell.get(column));
             }catch (NoSuchFieldException e){
-                log.error("");
+                log.error("Can not found field:'{}' in temple:{}",headCell.get(column),tempPath);
                 continue;
             }
             field.setAccessible(true);
-            int dataIndex = 1;
+
+            int dataIndex = 0;
             String startValue = field.get(dataList.get(dataIndex)).toString();
-            int startColumn = 0;
-            String currentValue = "";
+            int startRowIndex = annotation.dataRow();
+            String currentValue;
 
             for (int row = annotation.dataRow(); row <= dataList.size(); row++){
                 Row excelRow = sheet.getRow(row);
                 if(null == excelRow){
                     excelRow = sheet.createRow(row);
                 }
-                E data = dataList.get(dataIndex);
-                currentValue = field.get(data).toString();
-                if(Objects.equals(startValue,currentValue)){
-                    CellRangeAddress cellRangeAddress = new CellRangeAddress(startColumn, row, column, column);
-                    sheet.addMergedRegion(cellRangeAddress);
-                    writeAndMergeCell(field,data,startColumn,column,row,excelRow);
-                    startColumn = column;
-                    startValue = currentValue;
+                E outputData = dataList.get(dataIndex++);
+                currentValue = field.get(outputData).toString();
+                if(Objects.equals(startValue,currentValue) && startRowIndex != row){
+                   continue;
                 }
+                if(row-startRowIndex>1) {
+                    CellRangeAddress cellRangeAddress = new CellRangeAddress(startRowIndex, row-1, column, column);
+                    sheet.addMergedRegion(cellRangeAddress);
+                }
+                writeCell(field, outputData, column, excelRow);
+                startRowIndex = row;
+                startValue = currentValue;
             }
         }
-        return null;
+        return workbook;
     }
 
-    private void writeAndMergeCell(Field field,Object data, int startColumn, int column, int row, Row excelRow) {
+    private void writeCell(Field field,Object data, int cellIndex, Row excelRow) {
         field.setAccessible(true);
         Object filedValue;
         try {
@@ -68,7 +73,7 @@ public class MergeWriter {
             log.warn("Fail to write cell, can not access field:'"+field.getName()+"'");
             return;
         }
-        Cell cell = excelRow.createCell(startColumn);
+        Cell cell = excelRow.createCell(cellIndex);
         Class<?> fieldCls =field.getType();
         if(fieldCls.isInstance("")){
             cell.setCellValue(filedValue.toString());
