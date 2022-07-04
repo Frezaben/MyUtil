@@ -39,7 +39,7 @@ public class ManualReader implements ReaderFactory {
         List<E> dataList = new ArrayList<>();
         int startRow = annotation.dataRow();
         int lastRow = sheet.getLastRowNum();
-        for (; startRow < lastRow; startRow++){
+        for (; startRow <= lastRow; startRow++){
             E data = commonReader.getInstance(cls);
             readRow(sheet.getRow(startRow),data);
             dataList.add(data);

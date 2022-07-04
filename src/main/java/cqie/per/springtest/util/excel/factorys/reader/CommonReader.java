@@ -79,7 +79,7 @@ public class CommonReader {
             if (annotation.readIgnore()){
                 return;
             }
-            nullable = annotation.notNull();
+            nullable = annotation.outputNotNull();
         }
         if(cell.getCellType() == CellType.BLANK ){
             if (nullable){

@@ -18,7 +18,7 @@ import java.util.Objects;
 public class MergeWriter {
     private final CommonWriter commonWriter = new CommonWriter();
 
-    public <E> Workbook write(List<E> dataList,String tempPath) throws IllegalAccessException {
+    public <E> Workbook write(List<E> dataList, String tempPath, Sheet sheet) throws IllegalAccessException {
         Workbook workbook = commonWriter.getWorkbook(tempPath);
         Class<?> cls = dataList.get(0).getClass();
         ExcelSheet annotation = cls.getAnnotation(ExcelSheet.class);
@@ -26,7 +26,6 @@ public class MergeWriter {
         HashMap<Integer, String> headCell =
                 commonWriter.getHeadCell(workbook.getSheet(sheetName),annotation.sectionRow());
         int columnSize = headCell.size();
-        Sheet sheet = workbook.getSheet(sheetName);
         for(int column = 0; column < columnSize;column++){
             Field field;
             try {

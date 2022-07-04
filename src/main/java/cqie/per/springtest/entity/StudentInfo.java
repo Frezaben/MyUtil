@@ -4,9 +4,9 @@ import cqie.per.springtest.util.excel.annotations.ExcelCell;
 import cqie.per.springtest.util.excel.annotations.ExcelSheet;
 import cqie.per.springtest.util.excel.enums.ReadModelEnum;
 
-@ExcelSheet(sheet = "工作表1",model = ReadModelEnum.MANUAL)
+@ExcelSheet(sheet = "名称",model = ReadModelEnum.MANUAL)
 public class StudentInfo {
-    @ExcelCell(cell = "A",mergedSameRegion = true)
+    @ExcelCell(cell = "A",mergedSameRegion = true, outputNotNull = true)
     private String name;
     @ExcelCell(cell = "B",mergedSameRegion = true)
     private Integer uid;

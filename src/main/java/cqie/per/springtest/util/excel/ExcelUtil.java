@@ -55,11 +55,12 @@ public class ExcelUtil {
         }
         HashMap<Integer,String> headRow = writer.getHeadCell(sheet,annotation.sectionRow());
         if(null!=ignoreFields&&ignoreFields.length>0){
+            Collection<String> values = headRow.values();
             for (String ignoreFiled : ignoreFields){
-                headRow.remove(ignoreFiled);
+                values.remove(ignoreFiled);
             }
         }
         MergeWriter mergeWriter = new MergeWriter();
-        return mergeWriter.write(dataList,templatePaths);
+        return mergeWriter.write(dataList,templatePaths,sheet);
     }
  }
