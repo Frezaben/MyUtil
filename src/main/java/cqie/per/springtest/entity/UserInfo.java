@@ -1,7 +1,7 @@
 package cqie.per.springtest.entity;
 
-import cqie.per.springtest.util.excel.ExcelCell;
-import cqie.per.springtest.util.excel.ExcelSheet;
+import cqie.per.springtest.util.excel.annotations.ExcelCell;
+import cqie.per.springtest.util.excel.annotations.ExcelSheet;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-@ExcelSheet(sheet = "工作表1",auto = true)
+@ExcelSheet(sheet = "工作表1")
 @Data
 public class UserInfo {
     @ApiModelProperty("姓名")
@@ -18,7 +18,7 @@ public class UserInfo {
     private Set<Integer> set;
     @ApiModelProperty("编号")
     private Long id;
-    @ExcelCell(cellName = "用户代码")
+    @ExcelCell(cell = "用户代码")
     private Integer uid;
     public String age;
     @ApiModelProperty("时间")

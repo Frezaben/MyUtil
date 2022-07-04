@@ -1,5 +1,6 @@
 package cqie.per.springtest.controller;
 
+import cqie.per.springtest.entity.StudentInfo;
 import cqie.per.springtest.entity.UserInfo;
 import cqie.per.springtest.util.excel.ExcelUtil;
 import io.swagger.annotations.ApiOperation;
@@ -17,19 +18,20 @@ import java.util.List;
 @RestController
 public class TestController {
 
-    @PostMapping(value = "xxx")
+
+    @PostMapping(value = "xxx", consumes = {"multipart/form-data"})
     @ApiOperation("test")
-    public List<UserInfo> uploadBom(@RequestBody MultipartFile file){
+    public List<StudentInfo> uploadBom(@RequestParam MultipartFile file){
         System.out.println(file.getName());
-        return ExcelUtil.readExcel(file,UserInfo.class);
+        return ExcelUtil.read(file, StudentInfo.class);
 
     }
 
     @PostMapping(value = "xxxx")
     @ApiOperation("test")
-    public List<UserInfo> xxxxx(@RequestBody MultipartFile file){
+    public List<UserInfo> xxxxx(@RequestParam MultipartFile file){
         System.out.println(file.getName());
-        return ExcelUtil.readExcel(file,UserInfo.class);
+        return ExcelUtil.read(file,UserInfo.class);
 
     }
 
@@ -46,21 +48,17 @@ public class TestController {
 
     @RequestMapping(value = "x")
     @ApiOperation("output")
-    public String xx(){
-        List<UserInfo> userInfos = new ArrayList<>();
-        UserInfo userInfo = new UserInfo();
-        userInfo.setAge("10");
-        userInfo.setId(10000L);
-        userInfo.setUid(101);
-        userInfo.setName("wang.de.fa");
-        userInfos.add(userInfo);
-        UserInfo userInfo1 = new UserInfo();
-        userInfo1.setAge("12");
-        userInfo1.setId(10000L);
-        userInfo1.setUid(101);
-        userInfo1.setName("de.de.fa");
-        userInfos.add(userInfo1);
-        Workbook workbook = ExcelUtil.output("C:\\Users\\benye\\Desktop\\tem.xlsx",userInfos,UserInfo.class);
+    public String xx() throws IllegalAccessException {
+        List<StudentInfo> studentList = new ArrayList<>();
+        StudentInfo studentInfo = new StudentInfo();
+        studentInfo.setName("xx");
+        studentInfo.setUid(18900);
+        StudentInfo studentInfo1 = new StudentInfo();
+        studentInfo1.setName("xxx");
+        studentInfo1.setUid(1800);
+        studentList.add(studentInfo);
+        studentList.add(studentInfo1);
+        Workbook workbook = ExcelUtil.write("C:\\Users\\benye\\Desktop\\tem.xlsx",studentList,StudentInfo.class);
         FileOutputStream fileOutputStream = null;
         File file = new File("C:\\Users\\benye\\Desktop\\output.xlsx");
         try {

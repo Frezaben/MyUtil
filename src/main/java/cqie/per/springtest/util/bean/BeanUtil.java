@@ -2,9 +2,7 @@ package cqie.per.springtest.util.bean;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -125,7 +123,6 @@ public class BeanUtil {
         return json;
     }
 
-
     private static String beanToJSON(Object o, String ...ignoreProperty) throws IllegalAccessException {
         String body = "{";
         Class<?> cls = o.getClass();
@@ -190,12 +187,35 @@ public class BeanUtil {
         return body;
     }
 
-    private static String mapToJSON(Field field, Object o){
-        return "null";
+    private static String arrayToJSON(Field field, Object o) throws IllegalAccessException {
+        String body = "[";
+        Object[] array = (Object[]) field.get(o);
+        for (Object value : array) {
+            if (value instanceof String) {
+                body = body.concat("\"").concat(value.toString()).concat("\",");
+            } else {
+                body = body.concat(value.toString()).concat(",");
+            }
+        }
+        body = body.substring(0,body.length()-1);
+        body = body.concat("],");
+        return body;
     }
 
-    private static String arrayToJSON(Field field, Object o){
-        return "null";
+    private static String mapToJSON(Field field, Object o) throws IllegalAccessException {
+        String body = "{";
+        Map<?,?> map = (Map<?, ?>) field.get(o);
+        for (Object key : map.keySet()){
+            body = body.concat("\"").concat(key.toString()).concat("\":");
+            if(map.get(key) instanceof Integer){
+                body = body.concat(((Integer) map.get(key)).toString()).concat(",");
+            }else {
+                body = body.concat("\"").concat(map.get(key).toString()).concat("\",");
+            }
+        }
+        body = body.substring(0,body.length()-1);
+        body = body.concat("},");
+        return body;
     }
 
     private static String baseToJSON(Field field, Object o) throws IllegalAccessException {
@@ -213,4 +233,7 @@ public class BeanUtil {
         }
         return body;
     }
+
+
+
 }
