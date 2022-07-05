@@ -55,7 +55,7 @@ public class MergeWriter {
                     CellRangeAddress cellRangeAddress = new CellRangeAddress(startRowIndex, row-1, column, column);
                     sheet.addMergedRegion(cellRangeAddress);
                 }
-                writeCell(field, outputData, column, excelRow);
+                CommonWriter.writeCell(field, outputData, column, excelRow);
                 startRowIndex = row;
                 startValue = currentValue;
             }
@@ -63,24 +63,6 @@ public class MergeWriter {
         return workbook;
     }
 
-    private void writeCell(Field field,Object data, int cellIndex, Row excelRow) {
-        field.setAccessible(true);
-        Object filedValue;
-        try {
-            filedValue = field.get(data);
-        } catch (IllegalAccessException e) {
-            log.warn("Fail to write cell, can not access field:'"+field.getName()+"'");
-            return;
-        }
-        Cell cell = excelRow.createCell(cellIndex);
-        Class<?> fieldCls =field.getType();
-        if(fieldCls.isInstance("")){
-            cell.setCellValue(filedValue.toString());
-        }else if(fieldCls.isInstance(0)||fieldCls.isInstance(Double.valueOf("0"))||fieldCls.isInstance(0L)){
-            cell.setCellValue(((Number) filedValue).doubleValue());
-        } else if(fieldCls.isInstance(new Date())){
-            cell.setCellValue((Date) filedValue);
-        }
-    }
+
 
 }
