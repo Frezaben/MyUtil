@@ -38,6 +38,10 @@ public class ExcelUtil {
         return reader.readExcel(file,cls);
     }
 
+    public static <E> List<E> read(Workbook workbook,Class<E> cls,ReaderFactory reader){
+        return reader.readExcel(workbook,cls);
+    }
+
     public static <E> Workbook write(String templatePaths, Collection<E> collection, Class<E> cls, String ...ignoreFields) throws IllegalAccessException {
         CommonWriter writer = new CommonWriter();
         Workbook template = writer.getWorkbook(templatePaths);

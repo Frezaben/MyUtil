@@ -12,6 +12,6 @@ public @interface ExcelCell {
     boolean useIndex() default false;
     boolean readIgnore() default false;
     boolean outputIgnore() default false;
-    boolean outputNotNull() default false;
+    boolean readNullAble() default true;
     boolean mergedSameRegion() default false;
 }

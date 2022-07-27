@@ -79,7 +79,7 @@ public class CommonReader {
             if (annotation.readIgnore()){
                 return;
             }
-            nullable = annotation.outputNotNull();
+            nullable = annotation.readNullAble();
         }
         if(cell.getCellType() == CellType.BLANK ){
             if (nullable){
@@ -117,7 +117,7 @@ public class CommonReader {
         }
         cell = cell.toUpperCase();
         char[] chars = cell.toCharArray();
-        int num  = 0;
+        int num  = 26 * (chars.length-1);
         for (char str : chars){
             num += str - 'A';
         }

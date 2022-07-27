@@ -6,7 +6,7 @@ import cqie.per.springtest.util.excel.enums.ReadModelEnum;
 
 @ExcelSheet(sheet = "名称",model = ReadModelEnum.MANUAL)
 public class StudentInfo {
-    @ExcelCell(cell = "A",mergedSameRegion = true, outputNotNull = true)
+    @ExcelCell(cell = "A",mergedSameRegion = true, readNullAble = true)
     private String name;
     @ExcelCell(cell = "B",mergedSameRegion = true)
     private Integer uid;

@@ -47,6 +47,11 @@ public class ManualReader implements ReaderFactory {
         return dataList;
     }
 
+    @Override
+    public <E> List<E> readExcel(Workbook workbook, Class<E> cls) {
+        return null;
+    }
+
     private <E> void readRow(Row row, E data) { Class<?> cls = data.getClass();
         Field[] dataFields = cls.getDeclaredFields();
         for(Field field : dataFields){

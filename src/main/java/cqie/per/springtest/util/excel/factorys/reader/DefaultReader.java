@@ -21,17 +21,12 @@ public class DefaultReader implements ReaderFactory {
     @Override
     public <E> List<E> readExcel(MultipartFile file, Class<E> cls) {
         Workbook workbook = commonReader.getWorkbook(file);
-        Sheet sheet = workbook.getSheetAt(SHEET_INDEX);
-        Map<String,Integer> headCell = commonReader.getHeadCell(sheet,SECTION);
-        int startRow = SECTION + 1;
-        int lastRow = sheet.getLastRowNum();
-        List<E> dataList = new ArrayList<>();
-        for (; startRow < lastRow; startRow++){
-            E data = commonReader.getInstance(cls);
-            readRow(sheet.getRow(startRow),data,headCell);
-            dataList.add(data);
-        }
-        return dataList;
+        return doRead(workbook,cls);
+    }
+
+    @Override
+    public <E> List<E> readExcel(Workbook workbook, Class<E> cls) {
+        return doRead(workbook,cls);
     }
 
     private <E> void readRow(Row row, E data, Map<String,Integer> headRow) {
@@ -46,6 +41,20 @@ public class DefaultReader implements ReaderFactory {
             }
             commonReader.readCell(row, data, field, celNum);
         }
+    }
+
+    private <E> List<E> doRead(Workbook workbook, Class<E> cls){
+        Sheet sheet = workbook.getSheetAt(SHEET_INDEX);
+        Map<String,Integer> headCell = commonReader.getHeadCell(sheet,SECTION);
+        int startRow = SECTION + 1;
+        int lastRow = sheet.getLastRowNum();
+        List<E> dataList = new ArrayList<>();
+        for (; startRow < lastRow; startRow++){
+            E data = commonReader.getInstance(cls);
+            readRow(sheet.getRow(startRow),data,headCell);
+            dataList.add(data);
+        }
+        return dataList;
     }
 
 }
