@@ -7,19 +7,21 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
 @Slf4j
 public class MergeWriter {
-    private final CommonWriter commonWriter = new CommonWriter();
 
-    public <E> Workbook write(List<E> dataList, String tempPath, Sheet sheet) throws IllegalAccessException {
-        //获取输出模板workbook
-        Workbook workbook = commonWriter.getWorkbook(tempPath);
+
+    public <E> Workbook write(List<E> dataList, Sheet sheet, String ...ignoreFields) throws IllegalAccessException {
+        //复制输出workbook
+        Workbook workbook = sheet.getWorkbook();
         //获取类型
         Class<?> cls = dataList.get(0).getClass();
         //获取注解
@@ -27,7 +29,13 @@ public class MergeWriter {
         String sheetName = annotation.sheet();
         //获取模板的头
         HashMap<Integer, String> headCell =
-                commonWriter.getHeadCell(workbook.getSheet(sheetName),annotation.sectionRow());
+                CommonWriter.getHeadCell(workbook.getSheet(sheetName),annotation.sectionRow());
+        if(null!=ignoreFields&&ignoreFields.length>0){
+            Collection<String> values = headCell.values();
+            for (String ignoreFiled : ignoreFields){
+                values.remove(ignoreFiled);
+            }
+        }
         int columnSize = headCell.size();
         //外层循环列，遍历列再遍历行，实现相邻格（列）的合并
         for(int column = 0; column < columnSize;column++){
@@ -36,7 +44,7 @@ public class MergeWriter {
                 //从模板头Map里获取当前列的属性
                 field = cls.getDeclaredField(headCell.get(column));
             }catch (NoSuchFieldException e){
-                log.error("Can not found field:'{}' in temple:{}",headCell.get(column),tempPath);
+                log.error("Can not found field:'{}' in class:{}",headCell.get(column),cls.getName());
                 continue;
             }
             //开放属性的访问
@@ -89,7 +97,8 @@ public class MergeWriter {
                 startValue = currentValue;
             }
         }
-        return workbook;
+        //复制输出workbook
+        return sheet.getWorkbook();
     }
 
 

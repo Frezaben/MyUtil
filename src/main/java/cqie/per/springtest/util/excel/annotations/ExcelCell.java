@@ -10,8 +10,6 @@ import java.lang.annotation.Target;
 public @interface ExcelCell {
     String cell();
     boolean useIndex() default false;
-    boolean readIgnore() default false;
-    boolean outputIgnore() default false;
     boolean readNullAble() default true;
     boolean mergedSameRegion() default false;
 }

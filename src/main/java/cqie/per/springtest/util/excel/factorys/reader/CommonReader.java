@@ -74,11 +74,9 @@ public class CommonReader {
             return;
         }
         ExcelCell annotation = field.getAnnotation(ExcelCell.class);
+
         boolean nullable = true;
         if(null != annotation){
-            if (annotation.readIgnore()){
-                return;
-            }
             nullable = annotation.readNullAble();
         }
         if(cell.getCellType() == CellType.BLANK ){

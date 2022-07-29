@@ -42,29 +42,14 @@ public class ExcelUtil {
         return reader.readExcel(workbook,cls);
     }
 
-    public static <E> Workbook write(String templatePaths, Collection<E> collection, Class<E> cls, String ...ignoreFields) throws IllegalAccessException {
-        CommonWriter writer = new CommonWriter();
-        Workbook template = writer.getWorkbook(templatePaths);
+    public static <E> Workbook write(Collection<E> collection, Class<E> cls, String ...ignoreFields) throws IllegalAccessException {
+        Workbook template = CommonWriter.getWorkbook(cls);
         if (null == collection || collection.size()==0){
-            return null;
+            return template;
         }
         List<E> dataList = collection.stream().toList();
-        ExcelSheet annotation = cls.getAnnotation(ExcelSheet.class);
-        Sheet sheet;
-        String sheetName = annotation.sheet();
-        if("".equals(sheetName)){
-            sheet = template.getSheetAt(0);
-        }else {
-            sheet = template.getSheet(sheetName);
-        }
-        HashMap<Integer,String> headRow = writer.getHeadCell(sheet,annotation.sectionRow());
-        if(null!=ignoreFields&&ignoreFields.length>0){
-            Collection<String> values = headRow.values();
-            for (String ignoreFiled : ignoreFields){
-                values.remove(ignoreFiled);
-            }
-        }
         MergeWriter mergeWriter = new MergeWriter();
-        return mergeWriter.write(dataList,templatePaths,sheet);
+        return mergeWriter.write(dataList,template.getSheetAt(0), ignoreFields);
     }
+
  }

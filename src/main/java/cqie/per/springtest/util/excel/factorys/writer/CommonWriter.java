@@ -1,5 +1,7 @@
 package cqie.per.springtest.util.excel.factorys.writer;
 
+import cqie.per.springtest.util.excel.annotations.ExcelSheet;
+import cqie.per.springtest.util.excel.annotations.OutputIgnore;
 import cqie.per.springtest.util.excel.exception.ExcelReadException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -8,15 +10,17 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class CommonWriter {
 
-    public HashMap<Integer,String> getHeadCell(Sheet sheet, int section){
+    public static HashMap<Integer,String> getHeadCell(Sheet sheet, int section){
         Row headRow = sheet.getRow(section);
         HashMap<Integer,String> headCell = new HashMap<>();
         int startCell = headRow.getFirstCellNum();
@@ -32,7 +36,7 @@ public class CommonWriter {
         return headCell;
     }
 
-    public Workbook getWorkbook(String path){
+    public static Workbook getWorkbook(String path){
         Workbook workbook;
         File file = new File(path);
         InputStream inputStream;
@@ -58,6 +62,29 @@ public class CommonWriter {
             } catch (IOException e) {
                 log.error("Can not close file ,"+e.getMessage());
             }
+        }
+        return workbook;
+    }
+
+    public static <E> Workbook getWorkbook(Class<E> cls){
+        Workbook workbook = new XSSFWorkbook();
+        ExcelSheet annotation = cls.getAnnotation(ExcelSheet.class);
+        if(null == annotation || !StringUtils.hasText(annotation.sheet())) {
+            workbook.createSheet("sheet1");
+        }else {
+            workbook.createSheet(annotation.sheet());
+        }
+        Field[] fields = cls.getDeclaredFields();
+
+        int sectionRow = 0;
+        if(null != annotation){
+            sectionRow = annotation.sectionRow();
+        }
+        List<Field> fieldList = Arrays.stream(fields)
+                .filter(item-> null == item.getAnnotation(OutputIgnore.class))
+                .collect(Collectors.toList());
+        for(int column = 0;column< fields.length; column++){
+
         }
         return workbook;
     }

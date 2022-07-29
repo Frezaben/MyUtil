@@ -13,6 +13,7 @@ import java.util.Set;
 @Data
 public class UserInfo {
     @ApiModelProperty("姓名")
+    @ExcelCell(cell = "A",useIndex = true,mergedSameRegion = true)
     private String name;
     private List<String> list;
     private Set<Integer> set;
@@ -20,6 +21,7 @@ public class UserInfo {
     private Long id;
     @ExcelCell(cell = "用户代码")
     private Integer uid;
+    @ExcelCell(cell = "B",useIndex = true,mergedSameRegion = true)
     public String age;
     @ApiModelProperty("时间")
     public Date time;

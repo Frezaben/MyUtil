@@ -69,7 +69,7 @@ public class TestController {
         studentList.add(studentInfo3);
 
 
-        Workbook workbook = ExcelUtil.write("",studentList,StudentInfo.class);
+        Workbook workbook = ExcelUtil.write(studentList,StudentInfo.class);
         FileOutputStream fileOutputStream = null;
         File file = new File("");
         try {
