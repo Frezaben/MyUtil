@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExcelCell {
     String cell();
+    String outputName() default "";
     boolean useIndex() default false;
     boolean readNullAble() default true;
     boolean mergedSameRegion() default false;

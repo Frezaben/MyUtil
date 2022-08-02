@@ -20,7 +20,7 @@ import java.util.HashMap;
 @Slf4j
 public class CommonReader {
 
-    public Workbook getWorkbook(MultipartFile file){
+    public static Workbook getWorkbook(MultipartFile file){
         Workbook workbook = null;
         String fileName = file.getOriginalFilename();
         if (null == fileName){
@@ -52,7 +52,7 @@ public class CommonReader {
         return workbook;
     }
 
-    public HashMap<String,Integer> getHeadCell(Sheet sheet, int section){
+    public static HashMap<String,Integer> getHeadCell(Sheet sheet, int section){
         Row headRow = sheet.getRow(section);
         HashMap<String,Integer> headCell = new HashMap<>();
         int startCell = headRow.getFirstCellNum();
@@ -68,7 +68,7 @@ public class CommonReader {
         return headCell;
     }
 
-    public <E> void readCell(Row row, E data, Field field, int celNum){
+    public static  <E> void readCell(Row row, E data, Field field, int celNum){
         Cell cell = row.getCell(celNum);
         if(null == cell){
             return;
@@ -109,7 +109,7 @@ public class CommonReader {
         }
     }
 
-    public int getCellNum(String cell){
+    public static int getCellNum(String cell){
         if("".equals(cell) || null == cell){
             throw new ExcelReadException("Unknown index");
         }
@@ -122,7 +122,7 @@ public class CommonReader {
         return num;
     }
 
-    public String getCellStr(int cell){
+    public static String getCellStr(int cell){
         int intNum = cell / 26;
         int remNum = cell % 26;
         String str = "";
@@ -133,7 +133,7 @@ public class CommonReader {
         return str;
     }
 
-    public <E> E getInstance(Class<E> cls){
+    public static  <E> E getInstance(Class<E> cls){
         E data;
         try {
             data = cls.getDeclaredConstructor().newInstance();

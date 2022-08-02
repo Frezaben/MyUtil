@@ -14,13 +14,12 @@ import java.util.Map;
 
 @Slf4j
 public class DefaultReader implements ReaderFactory {
-    private final CommonReader commonReader = new CommonReader();
     private static final int SECTION = 1;
     private static final int SHEET_INDEX = 0;
 
     @Override
     public <E> List<E> readExcel(MultipartFile file, Class<E> cls) {
-        Workbook workbook = commonReader.getWorkbook(file);
+        Workbook workbook = CommonReader.getWorkbook(file);
         return doRead(workbook,cls);
     }
 
@@ -39,18 +38,18 @@ public class DefaultReader implements ReaderFactory {
                 log.warn("Can not find field:'"+field.getName()+"' in excel, continue processing excel");
                 continue;
             }
-            commonReader.readCell(row, data, field, celNum);
+            CommonReader.readCell(row, data, field, celNum);
         }
     }
 
     private <E> List<E> doRead(Workbook workbook, Class<E> cls){
         Sheet sheet = workbook.getSheetAt(SHEET_INDEX);
-        Map<String,Integer> headCell = commonReader.getHeadCell(sheet,SECTION);
+        Map<String,Integer> headCell = CommonReader.getHeadCell(sheet,SECTION);
         int startRow = SECTION + 1;
         int lastRow = sheet.getLastRowNum();
         List<E> dataList = new ArrayList<>();
         for (; startRow < lastRow; startRow++){
-            E data = commonReader.getInstance(cls);
+            E data = CommonReader.getInstance(cls);
             readRow(sheet.getRow(startRow),data,headCell);
             dataList.add(data);
         }

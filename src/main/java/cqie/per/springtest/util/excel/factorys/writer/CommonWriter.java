@@ -1,8 +1,11 @@
 package cqie.per.springtest.util.excel.factorys.writer;
 
+import cqie.per.springtest.util.excel.annotations.ExcelCell;
 import cqie.per.springtest.util.excel.annotations.ExcelSheet;
 import cqie.per.springtest.util.excel.annotations.OutputIgnore;
 import cqie.per.springtest.util.excel.exception.ExcelReadException;
+import cqie.per.springtest.util.excel.factorys.reader.CommonReader;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -69,10 +72,11 @@ public class CommonWriter {
     public static <E> Workbook getWorkbook(Class<E> cls){
         Workbook workbook = new XSSFWorkbook();
         ExcelSheet annotation = cls.getAnnotation(ExcelSheet.class);
+        Sheet sheet;
         if(null == annotation || !StringUtils.hasText(annotation.sheet())) {
-            workbook.createSheet("sheet1");
+           sheet = workbook.createSheet("sheet1");
         }else {
-            workbook.createSheet(annotation.sheet());
+           sheet = workbook.createSheet(annotation.sheet());
         }
         Field[] fields = cls.getDeclaredFields();
 
@@ -83,8 +87,32 @@ public class CommonWriter {
         List<Field> fieldList = Arrays.stream(fields)
                 .filter(item-> null == item.getAnnotation(OutputIgnore.class))
                 .collect(Collectors.toList());
+        Map<Integer,String> cellHead = new HashMap<>(fieldList.size());
+        fieldList.forEach(field -> {
+            ExcelCell excelCell = field.getAnnotation(ExcelCell.class);
+            if(null == excelCell || !excelCell.useIndex()){
+                return;
+            }
+            String outputName = excelCell.outputName();
+            if("".equals(outputName)){
+                ApiModelProperty apiModelProperty = field.getAnnotation(ApiModelProperty.class);
+                outputName = apiModelProperty.value();
+                if("".equals(outputName)){
+                    outputName = field.getName();
+                }
+            }
+            cellHead.put(CommonReader.getCellNum(excelCell.cell()),outputName);
+        });
+        fieldList.removeIf(field ->field.getAnnotation(ExcelCell.class).useIndex());
+        Row row = sheet.createRow(sectionRow);
+        int index=0;
         for(int column = 0;column< fields.length; column++){
-
+            Cell cell = row.createCell(column);
+            if(cellHead.containsKey(column)){
+                cell.setCellValue(cellHead.get(column));
+                continue;
+            }
+            cell.setCellValue(fieldList.get(index++).getName());
         }
         return workbook;
     }

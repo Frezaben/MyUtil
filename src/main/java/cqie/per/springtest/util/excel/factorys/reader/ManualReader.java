@@ -18,11 +18,10 @@ import java.util.List;
 
 @Slf4j
 public class ManualReader implements ReaderFactory {
-    private final CommonReader commonReader = new CommonReader();
 
     @Override
     public <E> List<E> readExcel(MultipartFile file, Class<E> cls) {
-        Workbook workbook = commonReader.getWorkbook(file);
+        Workbook workbook = CommonReader.getWorkbook(file);
         return doRead(workbook,cls);
     }
 
@@ -39,9 +38,9 @@ public class ManualReader implements ReaderFactory {
             if(null == cellAnnotation){
                 continue;
             }
-            celNum = commonReader.getCellNum(cellAnnotation.cell());
+            celNum = CommonReader.getCellNum(cellAnnotation.cell());
             try {
-                commonReader.readCell(row, data, field, celNum);
+                CommonReader.readCell(row, data, field, celNum);
             }catch (IllegalArgumentException e){
                 log.error("Invalid column index (" + celNum + "), using manual module must use index at annotation:'Cell()'");
             }
@@ -66,7 +65,7 @@ public class ManualReader implements ReaderFactory {
         int startRow = annotation.dataRow();
         int lastRow = sheet.getLastRowNum();
         for (; startRow <= lastRow; startRow++){
-            E data = commonReader.getInstance(cls);
+            E data = CommonReader.getInstance(cls);
             readRow(sheet.getRow(startRow),data);
             dataList.add(data);
         }

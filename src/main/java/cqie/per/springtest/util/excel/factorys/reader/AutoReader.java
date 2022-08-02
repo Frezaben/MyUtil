@@ -19,12 +19,11 @@ import java.util.Map;
 
 @Slf4j
 public class AutoReader implements ReaderFactory {
-    private final CommonReader commonReader = new CommonReader();
     private static final int SHEET_INDEX = 0;
 
     @Override
     public <E> List<E> readExcel(MultipartFile file, Class<E> cls) {
-        Workbook workbook = commonReader.getWorkbook(file);
+        Workbook workbook = CommonReader.getWorkbook(file);
         return doRead(workbook,cls);
     }
 
@@ -42,7 +41,7 @@ public class AutoReader implements ReaderFactory {
             ExcelCell cellAnnotation = field.getAnnotation(ExcelCell.class);
             try {
                 if (cellAnnotation.useIndex()) {
-                    celNum = commonReader.getCellNum(cellAnnotation.cell());
+                    celNum = CommonReader.getCellNum(cellAnnotation.cell());
                 } else {
                     celNum = headCell.get(cellAnnotation.cell());
                     if (null != annotation) {
@@ -55,7 +54,7 @@ public class AutoReader implements ReaderFactory {
             }catch (NullPointerException nullPointerException){
                 celNum = headCell.get(field.getName());
             }
-            commonReader.readCell(row, data, field, celNum);
+            CommonReader.readCell(row, data, field, celNum);
         }
     }
     private <E> List<E> doRead(Workbook workbook, Class<E> cls){
@@ -71,12 +70,12 @@ public class AutoReader implements ReaderFactory {
             log.warn("sheet not assign, run with first sheet");
             sheet = workbook.getSheetAt(SHEET_INDEX);
         }
-        Map<String, Integer> headCell = commonReader.getHeadCell(sheet, annotation.sectionRow());
+        Map<String, Integer> headCell =  CommonReader.getHeadCell(sheet, annotation.sectionRow());
         List<E> dataList = new ArrayList<>();
         int startRow = annotation.dataRow();
         int lastRow = sheet.getLastRowNum();
         for (; startRow < lastRow; startRow++) {
-            E data = commonReader.getInstance(cls);
+            E data = CommonReader.getInstance(cls);
             readRow(sheet.getRow(startRow), data, headCell);
             dataList.add(data);
         }
